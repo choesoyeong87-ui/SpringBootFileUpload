@@ -1,19 +1,27 @@
 package com.zeus.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.zeus.domain.Item;
@@ -23,35 +31,36 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
-@MapperScan(basePackages = "com.zeus.mapper")
 @RequestMapping("/item")
+@MapperScan(basePackages = "com.zeus.mapper")
 public class ItemController {
 	@Autowired
 	private ItemService itemService;
-	// application.properties 에서 upload.path에 저장된 값을 주입한다.
+
+	// application.properties에서 upload.path에 저장된 값을 주입
 	@Value("${upload.path}")
 	private String uploadPath;
 
 	@GetMapping("/createForm")
-	public String itemCreateForm(Model model) {
-		log.info("/createForm");
+	public String itemCreateForm() {
+		log.info("createForm");
 		return "item/createForm";
 	}
 
 	@PostMapping("/create")
 	public String itemCreate(Item item, Model model) throws IOException, Exception {
-		log.info("/create item" + item.toString());
-		// 1. 파일업로드한것을 가져올것
+		log.info("create item = " + item.toString());
+		// 1. 파일 업로드한 것을 가져온다.
 		MultipartFile file = item.getPicture();
-		// 2. 파일정보를 로그파일에 기록한다.
+		// 2. 파일정보를 로그파일에 기록
 		log.info("originalName: " + file.getOriginalFilename());
 		log.info("size: " + file.getSize());
 		log.info("contentType: " + file.getContentType());
-		// 3. 파일을 외장하드에 저장할것
+		// 3. 파일을 외장하드에 저장
 		String createdFileName = uploadFile(file.getOriginalFilename(), file.getBytes());
-		// 4. 저장된 새로생성된 파일명을 아이템도메인에 저장한다.
+		// 4. 저장된 새로운 생성된 파일명을 item 도메인에 저장
 		item.setUrl(createdFileName);
-		// 5. 데이터 베이스에 상품화면 정보를 저장.
+		// 5. 테이블에 상품화면정보를 저장
 		int count = itemService.create(item);
 		if (count > 0) {
 			model.addAttribute("message", "%s 상품등록이 성공되었습니다.".formatted(file.getOriginalFilename()));
@@ -59,36 +68,86 @@ public class ItemController {
 		}
 		model.addAttribute("message", "%s 상품등록이 실패되었습니다.".formatted(file.getOriginalFilename()));
 		return "item/failed";
-
 	}
 
-	@GetMapping(value = "/list")
-	public String list(Model model) throws Exception {
-		log.info("/list");
-		List<Item> itemList = this.itemService.list();
-		model.addAttribute("itemList", itemList);
-		return "item/list";
+	@GetMapping("/list")
+	public void itemList(Model model) throws Exception {
+		log.info("itemList");
+		List<Item> list = itemService.list();
+		model.addAttribute("itemList", list);
 	}
-	
+
 	@GetMapping("/detail")
-	public String itemDetail(Model model) throws Exception {
-		log.info("/detail");
-		List<Item> itemList = this.itemService.list();
-		model.addAttribute("itemList", itemList);
+	public String itemDetail(Item i, Model model) throws Exception {
+		log.info("detail");
+		Item item = itemService.read(i);
+		model.addAttribute("item", item);
 		return "item/detail";
 	}
 
-	private String uploadFile(String originalName, byte[] fileData) throws Exception {
-		// 절대 중복되지않을 문자열을 생성해냄
-		UUID uid = UUID.randomUUID();
-		// new file("D:/upload",~~~~~.도훈.jpg")
-		// D:/upload/~~~~~~~~~~~~~~~~~~~_도훈.jpg 내용없는 파일명만 생성)
-		String createdFileName = uid.toString() + "_" + originalName;
-		File target = new File(uploadPath, createdFileName);
-		// 내용이 있는 진짜 파일내용 (파일내용이 있는 바이트배열) byte[] fileData
-		// ~~~~~~~~도훈.jpg 복사진행
-		FileCopyUtils.copy(fileData, target);
+	// 화면을 요청하는 것이 아니고, 데이터를 보내줄 것을 요청. 
+	@ResponseBody
+	@RequestMapping("/display")
+	public ResponseEntity<byte[]> itemDisplay(Item item) throws Exception {
+		log.info("itemDisplay");
+		// 파일을 읽기위한 스트링
+		InputStream in = null;
+		ResponseEntity<byte[]> entity = null;
+		
+		String url = itemService.getPicture(item);
+		log.info("FILE NAME: " + url);
+		try {
+			// dbb0b6c1-317c-425a-af77-29547132b9de_전우림.jpg
+			// 파일명의 확장자 가져온다. String formatName = "jpg";
+			String formatName = url.substring(url.lastIndexOf(".") + 1);
+			// 확장자가 jpg라면 MediaType.IMAGE_JPEG
+			MediaType mType = getMediaType(formatName);
+			// 클라이언트 <-> 서버(header, body)
+			HttpHeaders headers = new HttpHeaders();
+			//이미지파일을 inputStream으로 가져온다.
+			in = new FileInputStream(uploadPath + File.separator + url);
+			// 이미지파일타입이 null이 아니라면, 헤더에 이미지 타입을 저장
+			if (mType != null) {
+				headers.setContentType(mType);
+			}
+			//IOUtils.toByteArray(in) : inputStream에 저장된 파일을 byte[] 변환한다.
+			entity = new ResponseEntity<byte[]>(IOUtils.toByteArray(in), headers, HttpStatus.CREATED);
+		} catch (Exception e) {
+			e.printStackTrace();
+			entity = new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST);
+		} finally {
+			in.close();
+		}
+		return entity;
+	}
 
+	private MediaType getMediaType(String form) {
+		String formatName = form.toUpperCase();
+		if (formatName != null) {
+			if (formatName.equals("JPG")) {
+				return MediaType.IMAGE_JPEG;
+			}
+			if (formatName.equals("GIF")) {
+				return MediaType.IMAGE_GIF;
+			}
+			if (formatName.equals("PNG")) {
+				return MediaType.IMAGE_PNG;
+			}
+		}
+		return null;
+	}
+
+	private String uploadFile(String originalName, byte[] fileData) throws Exception {
+		// 절대 중복되지 않는 문자열 생성
+		UUID uid = UUID.randomUUID();
+		// 0aecc135-a28c-41d1-8b81-bfb71ac36f4e_우림.jpg
+		String createdFileName = uid.toString() + "_" + originalName;
+		// new File("D:/upload", "0aecc135-a28c-41d1-8b81-bfb71ac36f4e_우림.jpg")
+		// D:/upload/0aecc135-a28c-41d1-8b81-bfb71ac36f4e_우림.jpg 내용이 없는 파일명만 생성
+		File target = new File(uploadPath, createdFileName);
+		// (파일내용이 있는 바이트배열)byte[] fileData을
+		// D:/upload/0aecc135-a28c-41d1-8b81-bfb71ac36f4e_우림.jpd에 복사진행
+		FileCopyUtils.copy(fileData, target);
 		return createdFileName;
 	}
 

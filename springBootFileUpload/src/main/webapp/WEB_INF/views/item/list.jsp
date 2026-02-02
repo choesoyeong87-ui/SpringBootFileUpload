@@ -60,7 +60,7 @@
                 <tr>
                     <td class="text-center text-muted">${item.id}</td>
                     <td>
-                        <a href="/item/detail?no=${item.id}" class="post-title">
+                        <a href="/item/detail?id=${item.id}" class="post-title">
                             ${item.name}
                         </a>
                     </td>
