@@ -2,6 +2,7 @@ package com.zeus.service;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +29,10 @@ public class ItemServiceImpl implements ItemService {
 	}
 
 	@Override
-	public int update(Item item) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+	@Transactional
+	public int update(Item i) throws Exception {
+		int count = itemMapper.update(i);
+		return count;
 	}
 
 	@Override

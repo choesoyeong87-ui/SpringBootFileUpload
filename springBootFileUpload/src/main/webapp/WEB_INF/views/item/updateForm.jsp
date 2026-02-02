@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -32,63 +31,52 @@
 
 <div class="form-card">
     <div class="form-header">
-        <h3 class="m-0">${member.name} 님의 수정화면</h3>
+        <h3 class="m-0">자료실업로드</h3>
         <p class="small opacity-75 mt-2">당신의 생각을 자유롭게 적어주세요.</p>
     </div>
     
     <div class="form-body">
-    
-        <form:form modelAttribute="member" action="/member/update" method="post">
+        <form action="/item/update" method="post" enctype="multipart/form-data">
+           
+            <div class="form-floating mb-3">
+                <input type="text" name="name" class="form-control shadow-none" id="name" value="${item.name}" required>
+                <label for="name">상품명</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" name="id" class="form-control shadow-none" id="id" value="${item.id}" readonly>
+                <label for="id">상품아이디</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" name="price" class="form-control shadow-none" id="price" value="${item.price}" required>
+                <label for="price">상품가격</label>
+            </div>
             
             <div class="form-floating mb-3">
-                <input type="text" name="no" class="form-control shadow-none" id="no" placeholder="no" value="${member.no}" required>
-                <label for="no">회원번호</label>
+            <img alt="상품이미지" src="/item/display?id=${item.id}" width="300"/>
+            <label for="picture">상품이미지</label>
+                <label for="picture">이미지</label>
             </div>
 
             <div class="form-floating mb-3">
-                <input type="text" name="id" class="form-control shadow-none" id="id" value="${member.id}" readonly>
-                <label for="id">회원아이디</label>
-            </div>
-            <div class="form-floating mb-3">
-                <input type="text" name="name" class="form-control shadow-none" id="name" placeholder="name" value="${member.name}" required>
-                <label for="name">이름</label>
+                <input type="file" name="picture" class="form-control shadow-none" id="picture">
+                <label for="picture">상품파일</label>
             </div>
             
             <div class="form-floating mb-3">
-                <input type="password" name="pw" class="form-control shadow-none" id="pw" placeholder="pw" value="${member.pw}" required>
-                <label for="pw">비밀번호</label>
+                <textarea  name="description" rows ="5" cols="20" class="form-control shadow-none" id="description" >${item.description}</textarea>
+                <label for="description">상품이미지설명</label>
             </div>
-<div class="btn-area">
-                       
-                <form:select path="authList[0].auth">
-                    <form:option value="" label="=== 선택해 주세요 ===" />
-                    <form:option value="ROLE_USER" label="사용자" />
-                    <form:option value="ROLE_MEMBER" label="회원" />
-                    <form:option value="ROLE_ADMIN" label="관리자" />
-                </form:select>
-                <form:select path="authList[1].auth">
-                    <form:option value="" label="=== 선택해 주세요 ===" />
-                    <form:option value="ROLE_USER" label="사용자" />
-                    <form:option value="ROLE_MEMBER" label="회원" />
-                    <form:option value="ROLE_ADMIN" label="관리자" />
-                </form:select>
-                <form:select path="authList[2].auth">
-                    <form:option value="" label="=== 선택해 주세요 ===" />
-                    <form:option value="ROLE_USER" label="사용자" />
-                    <form:option value="ROLE_MEMBER" label="회원" />
-                    <form:option value="ROLE_ADMIN" label="관리자" />
-                </form:select>
-           
-        </div>
+            
+            
             
 
             <div class="d-flex gap-2">
-                <a href="/member/memberList" class="btn btn-light w-25" style="width: 40% !important; white-space: normal;"><br>리스트 </a>
-                <button type="submit" class="btn btn-submit">수정전송</button>
-                <button type="reset" class="btn btn-submit">수정취소</button>
+                <a href="/item/list" class="btn btn-light w-25" style="width: 40% !important; white-space: normal;">상품이미지리스트 </a>
+                <button type="submit" class="btn btn-submit">수정등록</button>
+                <button type="reset" class="btn btn-submit">상품수정등록취소</button>
             </div>
             
-        </form:form>
+        </form>
     </div>
 </div>
 
