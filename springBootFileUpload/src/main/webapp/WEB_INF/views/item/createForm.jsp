@@ -60,7 +60,7 @@
             
 
             <div class="d-flex gap-2">
-                <a href="/itme/itmeList" class="btn btn-light w-25" style="width: 40% !important; white-space: normal;">상품이미지리스트 </a>
+                <a href="/itme/list" class="btn btn-light w-25" style="width: 40% !important; white-space: normal;">상품이미지리스트 </a>
                 <button type="submit" class="btn btn-submit">상품등록</button>
                 <button type="reset" class="btn btn-submit">상품등록취소</button>
             </div>

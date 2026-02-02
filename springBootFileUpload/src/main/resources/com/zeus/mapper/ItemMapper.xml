@@ -19,7 +19,8 @@
 
 	<select id="list" resultType="Item"> 
 <![CDATA[ 
-
+	SELECT id, name, price, description, url FROM item 
+	WHERE id > 0  ORDER BY id DESC
 ]]>
 	</select>
 	<select id="getPicture" resultType="String">

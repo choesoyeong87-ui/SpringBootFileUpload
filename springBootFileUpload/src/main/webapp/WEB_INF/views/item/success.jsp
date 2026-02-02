@@ -36,8 +36,8 @@
      <div class="form-body">
         <div class="d-flex gap-2">
                 <button type="button" class="btn btn-light w-25" onclick="history.back()">back</button>
-               <a href="/item/insertForm" class="btn btn-submit"><button type="submit"  class="btn btn-submit">회원가입</button></a> 
-                 <a href="/item/itemList" class="btn btn-submit"><button type="reset" class="btn btn-submit">회원 리스트</button></a> 
+               <a href="/item/createForm" class="btn btn-submit"><button type="submit"  class="btn btn-submit">상품등록</button></a> 
+                 <a href="/item/list" class="btn btn-submit"><button type="reset" class="btn btn-submit">상품 리스트</button></a> 
         </div>
      </div>
 </div>

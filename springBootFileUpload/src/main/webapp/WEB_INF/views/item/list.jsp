@@ -41,43 +41,41 @@
 <div class="list-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold m-0">List</h3>
-        <a href="/member/memberList" class="btn btn-write">회원 리스트</a>
-        <a href="/member/insertForm" class="btn btn-write">회원가입</a>
+        <a href="/item/list" class="btn btn-write">상품목록리스트</a>
+        <a href="/item/createForm" class="btn btn-write">상품등록</a>
     </div>
 
     <table class="table table-hover">
         <thead>
             <tr>
-                <th class="text-center" style="width: 10%">NO</th>
-                <th style="width: 20%">ID</th>
-                <th style="width: 20%">PW</th>
-                <th style="width: 20%">NAME</th>
-                <th class="text-center" style="width: 30%">REGDATE</th>
+                <th class="text-center" style="width: 10%">id</th>
+                <th style="width: 10%">NAME</th>
+                <th style="width: 10%">PRICE</th>
+                <th style="width: 70%">URL</th>
             </tr>
         </thead>
         <tbody>
             <%-- 요청하신 대로 boardList 변수명 유지 --%>
-            <c:forEach var="memberList" items="${memberList}">
+            <c:forEach var="item" items="${itemList}">
                 <tr>
-                    <td class="text-center text-muted">${memberList.no}</td>
+                    <td class="text-center text-muted">${item.id}</td>
                     <td>
-                        <a href="/member/detail?no=${memberList.no}" class="post-title">
-                            ${memberList.id}
+                        <a href="/item/detail?no=${item.id}" class="post-title">
+                            ${item.name}
                         </a>
                     </td>
-                    <td>${memberList.pw}</td>
-                    <td>${memberList.name}</td>
+                    <td>${item.price}</td>
+                    <td>${item.url}</td>
                     
                     <td class="text-center text-muted">
-                        <fmt:formatDate value="${memberList.regDate}" pattern="yyyy-MM-dd" />
                     </td>
                 </tr>
             </c:forEach>
             
-            <c:if test="${empty boardList}">
+            <c:if test="${empty itemList}">
                 <tr>
                     <td colspan="5" class="text-center py-5 text-muted">
-                       등록된 회원이 없습니다. 첫번째 주인공이 되어보세요!
+                       등록된 상품목록이 없습니다.
                     </td>
                 </tr>
             </c:if>
