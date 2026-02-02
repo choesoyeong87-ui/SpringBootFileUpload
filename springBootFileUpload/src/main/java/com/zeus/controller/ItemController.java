@@ -164,7 +164,8 @@ public class ItemController {
 		int count = itemService.update(item);
 		if (count > 0) {
 
-			if (oldUrl != null) deleteFile(oldUrl);
+			if (oldUrl != null)
+				deleteFile(oldUrl);
 
 			model.addAttribute("message", "%s 상품등록이 성공되었습니다.".formatted(item.getName()));
 			return "item/success";
@@ -172,6 +173,24 @@ public class ItemController {
 		model.addAttribute("message", "%s 상품등록이 실패되었습니다.".formatted(item.getName()));
 		return "item/failed";
 	}
+
+	@GetMapping("/delete")
+	public String itemDelete(Item item, Model model) throws Exception {
+		log.info("delete item: " + item.toString());
+		String url = itemService.getPicture(item);
+		int count = itemService.delete(item);
+
+		if (count > 0) {
+			if (url != null) deleteFile(url);
+			model.addAttribute("message", "%s 상품삭제가 성공되었습니다.".formatted(item.getId()));
+			return "item/success";
+		}
+		model.addAttribute("message", "%s 상품삭제가 실패되었습니다.".formatted(item.getId()));
+		return "item/failed";
+
+	}
+
+	
 
 	private String uploadFile(String originalName, byte[] fileData) throws Exception {
 		// 절대 중복되지 않는 문자열 생성
